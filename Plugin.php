@@ -80,11 +80,55 @@ class Beblank_Plugin implements Typecho_Plugin_Interface
      */
     public static function footer()
     {
+        echo '
+        <script>
+        (function () {
+           var ie = !!(window.attachEvent && !window.opera);
+           var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
+           var fn = [];
+           var run = function () { for (var i = 0; i < fn.length; i++) fn[i](); };
+           var d = document;
+           d.ready = function (f) {
+              if (!ie && !wk && d.addEventListener)
+              return d.addEventListener("DOMContentLoaded", f, false);
+              if (fn.push(f) > 1) return;
+              if (ie)
+                 (function () {
+                    try { d.documentElement.doScroll("left"); run(); }
+                    catch (err) { setTimeout(arguments.callee, 0); }
+                 })();
+              else if (wk)
+              var t = setInterval(function () {
+                 if (/^(loaded|complete)$/.test(d.readyState))
+                 clearInterval(t), run();
+              }, 0);
+           };
+        })();';
         $options = Helper::options()->plugin('Beblank');
         if ($options->config == 1) {
-            echo '<script type="text/javascript">window.onload=function(){var a=document.getElementById("body").getElementsByTagName("a");for(let i=0;i<a.length;i++){let url=a[i].href;if(typeof(url)!="undefined"&&url.length!=0&&a[i].getAttribute("target")!="_BLANK"){a[i].setAttribute("target","_BLANK")}}}</script>';
+            echo '
+            document.ready(function(){
+                var a = document.getElementsByTagName("body")[0].getElementsByTagName("a");
+                for(let i = 0; i < a.length; i++){
+                    let url = a[i].href;
+                    if(typeof(url) != "undefined" && url.length != 0 && a[i].getAttribute("target") != "_blank"){
+                        a[i].setAttribute("target", "_blank");
+                    }
+                }
+            });
+            </script>';
         } else {
-            echo '<script type="text/javascript">window.onload=function(){var a=document.getElementById("body").getElementsByTagName("a");for(let i=0;i<a.length;i++){let url=a[i].href;if(typeof(url)!="undefined"&&url.length!=0&&url.match("' . $_SERVER['HTTP_HOST'] . '")==null&&a[i].getAttribute("target")!="_BLANK"){a[i].setAttribute("target","_BLANK")}}}</script>';
+            echo '
+            document.ready(function(){
+                var a = document.getElementsByTagName("body")[0].getElementsByTagName("a");
+                for(let i = 0; i < a.length; i++){
+                    let url = a[i].href;
+                    if(typeof(url) != "undefined" && url.length != 0&&url.match("' . $_SERVER['HTTP_HOST'] . '") == null && a[i].getAttribute("target") != "_blank"){
+                        a[i].setAttribute("target", "_BLANK");
+                    }
+                }
+            });
+            </script>';
         }
     }
 }
